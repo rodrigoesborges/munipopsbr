@@ -1,11 +1,24 @@
 Package: munipopsbr
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Estimativa de população dos municípios por faixa etária no Brasil
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Rodrigo E. S. Borges
+Maintainer: Rodrigo Borges <rodrig@borges.net.br>
+Description: Este pacote recupera as últimas estimativas oficiais de população por município e faixa etária no Brasil, além de extrapolar, com base na informação oficial mais atualizada existente, para anos mais recentes ou futuros, utilizando um método próprio baseado na proporção entre pirâmides etárias municipais e estaduais. Atualmente requer pacotes do git (github) 'rodrigoesborges/datasus' e 'rodrigoesborges/RSidra' .
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Imports:
+  devtools,
+  magrittr,
+  stringr,
+  dplyr,
+  tidyr,
+  data.table,
+  RSIDRA,
+  datasus
+RoxygenNote: 7.1.0
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

@@ -1,0 +1,27 @@
+---
+title: "Função popmunicipal"
+author: "Rodrigo Borges"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Função popmunicipal}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+ Este pacote fornece estimativas de população municipal por ano e faixa etária para todo o Brasil no período desejado.
+
+Até o último ano com informação desagregada oficial disponível (2015 no momento de escrita), baseia-se em recuperar a informação das fontes oficiais apenas. 
+
+Para anos mais recentes, aplica metodologia adaptada à disponibilidade de informação mais recente de pirâmides etárias estaduais e totais de população estadual e municipal.
+
+```{r include=T, eval=FALSE}
+library(munipopsbr)
+head(popmunicipal(2014,2016))
+ ano cod_mun                 Município faixa_etaria populacao
+1   2014       0                     TOTAL   0 a 4 anos  14938042
+2   2014  110001     Alta Floresta D'Oeste   0 a 4 anos      2075
+3   2014  110037   Alto Alegre dos Parecis   0 a 4 anos      1100
+4   2014  110040              Alto Paraíso   0 a 4 anos      1567
+5   2014  110034          Alvorada D'Oeste   0 a 4 anos      1334
+6   2014  110002                 Ariquemes   0 a 4 anos      7774
+
+```
