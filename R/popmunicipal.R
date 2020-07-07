@@ -49,18 +49,28 @@ popmf <- data.frame(matrix(ncol = 4, nrow=0))
 anosel <- seq(anoin,anofim)
 #Definição do último ano disponível - argumento
 
-rp_anos <- as.character(seq(anoin,uano))
 
-for (i in 1:length(rp_anos)) {
-  pmf <- datasus::novapop_popbr_mun(periodo = rp_anos[i])
-  pmf <- pmf %>% gather(faixa_etaria,populacao,-1) %>%
-    separate(`Município`, c("cod_mun","Município"),sep="\\s", extra = "merge", fill = "left")
-  pmf <-  cbind(ano = rep(rp_anos[i],nrow(pmf)),pmf)
-  popmf <- rbind(popmf,pmf)
-}
 
-popmf$ano <- as.numeric(as.character(popmf$ano))
+if (anoin < uano) {
+  rp_anos <- as.character(seq(anoin,uano))
+  for (i in 1:length(rp_anos)) {
+    pmf <- datasus::novapop_popbr_mun(periodo = rp_anos[i])
+    pmf <- pmf %>% gather(faixa_etaria,populacao,-1) %>%
+      separate(`Município`, c("cod_mun","Município"),sep="\\s", extra = "merge", fill = "left")
+    pmf <-  cbind(ano = rep(rp_anos[i],nrow(pmf)),pmf)
+    popmf <- rbind(popmf,pmf)
 
+
+    popmf$ano <- as.numeric(as.character(popmf$ano))
+  }
+
+ } else {
+   pmf <- datasus::novapop_popbr_mun(periodo = uano)
+   pmf <- pmf %>% gather(faixa_etaria, populacao, -1)%>%
+     separate(`Município`, c("cod_mun","Município"), sep="\\s", extra = "merge", fill = "left")
+   pmf <- cbind(ano = rep(uano, nrow(pmf)),pmf)
+   popmf <- rbind(popmf,pmf)
+  }
 ###2) Estimação da população por faixa etária para anos posteriores ao último disponível
 
 #======= Necessidade da pirâmide etária=========
