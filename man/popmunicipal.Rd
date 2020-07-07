@@ -17,7 +17,7 @@ popmunicipal(anoin = 2012, anofim = 2020, uano = 2015, infanciadet = F)
 }
 \description{
 O objetivo deste script é baixar e processar as estimativas
-populacionais do IBGE para construção de indicadores 
+populacionais do IBGE para construção de indicadores
 nacionais, estaduais ou municipais com os demais
 dados municipais.
 As bases são o SIDRA e o DATASUS.

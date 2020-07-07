@@ -47,10 +47,9 @@ popmf <- data.frame(matrix(ncol = 4, nrow=0))
 
 #Cria sequencia dos anos
 anosel <- seq(anoin,anofim)
-#Definição do último ano disponível
-#Definição do primeiro ano de estudo - atualmente primeiro ano com microdados de CadÚnico disponíveis
-pano <- anoin
-rp_anos <- as.character(seq(pano,uano, 1))
+#Definição do último ano disponível - argumento
+
+rp_anos <- as.character(seq(anoin,uano))
 
 for (i in 1:length(rp_anos)) {
   pmf <- datasus::novapop_popbr_mun(periodo = rp_anos[i])
