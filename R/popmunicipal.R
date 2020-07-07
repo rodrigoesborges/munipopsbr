@@ -46,7 +46,7 @@ pano <- anoin
 rp_anos <- as.character(seq(pano,uano, 1))
 
 for (i in 1:length(rp_anos)) {
-  pmf <- novapop_popbr_mun(periodo = rp_anos[i])
+  pmf <- datasus::novapop_popbr_mun(periodo = rp_anos[i])
   pmf <- pmf %>% gather(faixa_etaria,populacao,-1) %>%
     separate(`Município`, c("cod_mun","Município"),sep="\\s", extra = "merge", fill = "left")
   pmf <-  cbind(ano = rep(rp_anos[i],nrow(pmf)),pmf)

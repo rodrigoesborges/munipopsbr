@@ -21,4 +21,7 @@ RoxygenNote: 7.1.0
 Suggests: 
     knitr,
     rmarkdown
+Remotes: 
+    rodrigoesborges/datasus,
+    rodrigoesborges/RSidra
 VignetteBuilder: knitr
