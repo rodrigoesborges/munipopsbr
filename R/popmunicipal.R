@@ -16,6 +16,8 @@
 #' @import dplyr
 #' @import data.table
 #' @import datasus
+#' @import RSIDRA
+#' @import rvest
 #' @export
 
 # Definição do período de estimativas populacionais
@@ -33,7 +35,7 @@ popmunicipal <- function(anoin = 2012, anofim = 2020, uano = 2015, infanciadet =
   # library(dplyr)
   # library(stringr)
   # library(RSIDRA)
-  # library(magrittr)
+  library(magrittr)
   # Para Correção de valores nulos extraídos do datasus
   # problema knitr source("R/zr_fun.R")
   # Função para colocar valor de 0.0001 no lugar de erros, não 0 para evitar divisão infinita

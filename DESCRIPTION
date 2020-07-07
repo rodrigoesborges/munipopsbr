@@ -1,7 +1,7 @@
 Package: munipopsbr
 Type: Package
 Title: Estimativa de população dos municípios por faixa etária no Brasil
-Version: 0.1.0.3
+Version: 0.1.0.4
 Author: Rodrigo E. S. Borges
 Maintainer: Rodrigo Borges <rodrig@borges.net.br>
 Description: Este pacote recupera as últimas estimativas oficiais de população por município e faixa etária no Brasil, além de extrapolar, com base na informação oficial mais atualizada existente, para anos mais recentes ou futuros, utilizando um método próprio baseado na proporção entre pirâmides etárias municipais e estaduais. Atualmente requer pacotes do git (github) 'rodrigoesborges/datasus' e 'rodrigoesborges/RSidra' .
