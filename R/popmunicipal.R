@@ -6,10 +6,16 @@
 #' dados municipais.
 #' As bases são o SIDRA e o DATASUS.
 #' @param anoin Primeiro ano para obter estimativa
-#' @param anofin Último ano de que se deseja obter informações
+#' @param anofim Último ano de que se deseja obter informações
 #' @param uano Último ano com tabela municipal disponível do IBGE para o TCU com desagregação por faixa etária municipal. Por padrão, 2015.
 #' @param infanciadet Detalhar a faixa etária de primeira infância. Atualmente funcional até um ano após último ano disponível de dados de nascidos vivos pelo TABNET/DATASUS, isto é ~ano atual -2.
 #'
+#' @import tidyr
+#' @import magrittr
+#' @import stringr
+#' @import dplyr
+#' @import data.table
+#' @import datasus
 #' @export
 
 # Definição do período de estimativas populacionais
@@ -21,12 +27,13 @@ popmunicipal <- function(anoin = 2012, anofim = 2020, uano = 2015, infanciadet =
 
 
   ##Carrega pacotes necessários:
-  library(tidyr)
-  library(datasus)
-  library(data.table)
-  library(dplyr)
-  library(stringr)
-  library(RSIDRA)
+  # library(tidyr)
+  # library(datasus)
+  # library(data.table)
+  # library(dplyr)
+  # library(stringr)
+  # library(RSIDRA)
+  # library(magrittr)
   # Para Correção de valores nulos extraídos do datasus
   # problema knitr source("R/zr_fun.R")
   # Função para colocar valor de 0.0001 no lugar de erros, não 0 para evitar divisão infinita

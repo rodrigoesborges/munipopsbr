@@ -9,11 +9,11 @@ popmunicipal(anoin = 2012, anofim = 2020, uano = 2015, infanciadet = F)
 \arguments{
 \item{anoin}{Primeiro ano para obter estimativa}
 
+\item{anofim}{Último ano de que se deseja obter informações}
+
 \item{uano}{Último ano com tabela municipal disponível do IBGE para o TCU com desagregação por faixa etária municipal. Por padrão, 2015.}
 
 \item{infanciadet}{Detalhar a faixa etária de primeira infância. Atualmente funcional até um ano após último ano disponível de dados de nascidos vivos pelo TABNET/DATASUS, isto é ~ano atual -2.}
-
-\item{anofin}{Último ano de que se deseja obter informações}
 }
 \description{
 O objetivo deste script é baixar e processar as estimativas
