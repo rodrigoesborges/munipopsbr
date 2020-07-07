@@ -1,7 +1,7 @@
 #' Estima populações municipais por faixa etária para o Brasil
-#' 
+#'
 #' O objetivo deste script é baixar e processar as estimativas
-#' populacionais do IBGE para construção de indicadores 
+#' populacionais do IBGE para construção de indicadores
 #' nacionais, estaduais ou municipais com os demais
 #' dados municipais.
 #' As bases são o SIDRA e o DATASUS.
@@ -9,7 +9,7 @@
 #' @param anofin Último ano de que se deseja obter informações
 #' @param uano Último ano com tabela municipal disponível do IBGE para o TCU com desagregação por faixa etária municipal. Por padrão, 2015.
 #' @param infanciadet Detalhar a faixa etária de primeira infância. Atualmente funcional até um ano após último ano disponível de dados de nascidos vivos pelo TABNET/DATASUS, isto é ~ano atual -2.
-#' 
+#'
 #' @export
 
 # Definição do período de estimativas populacionais
@@ -18,8 +18,8 @@
 
 
 popmunicipal <- function(anoin = 2012, anofim = 2020, uano = 2015, infanciadet = F) {
-  
-  
+
+
   # Para Correção de valores nulos extraídos do datasus
   # problema knitr source("R/zr_fun.R")
   # Função para colocar valor de 0.0001 no lugar de erros, não 0 para evitar divisão infinita
@@ -31,15 +31,15 @@ popmunicipal <- function(anoin = 2012, anofim = 2020, uano = 2015, infanciadet =
       0.0001
     }
   }
-  
-  
-  
+
+
+
 ###1) Obtenção das população por faixa etária e consolidação em uma base geral de população por faixa etária por município:
 #Inicialização de tabela base de população por faixa etária
 popmf <- data.frame(matrix(ncol = 4, nrow=0))
 
 #Cria sequencia dos anos
-anosel <- seq(anoin,anofim,1)
+anosel <- seq(anoin,anofim)
 #Definição do último ano disponível
 #Definição do primeiro ano de estudo - atualmente primeiro ano com microdados de CadÚnico disponíveis
 pano <- anoin
@@ -78,13 +78,13 @@ rp_uano_uf <- setDT(rp_uano)[,.(populacao = sum(populacao, na.rm = TRUE)),
 prp_uano_uf <- setDT(rp_uano_uf)[,propuf := populacao/sum(populacao[faixa_etaria != "Total"], na.rm = TRUE), by = uf]
 
 #piram_mun pelo RIPSA, último ano disponível
-prp_uano_m <- setDT(rp_uano)[,prop := populacao/sum(populacao[faixa_etaria != "Total"], na.rm = TRUE), 
+prp_uano_m <- setDT(rp_uano)[,prop := populacao/sum(populacao[faixa_etaria != "Total"], na.rm = TRUE),
                       by = c("ano","cod_mun","Município")]
 
 #Cálculo do 'Fator´  para último ano disponível de pirâmide etária
 
-prp_uano_m <- (setDT(prp_uano_m %>% mutate(uf = substr(cod_mun,1,2)))[setDT(prp_uano_uf), 
-                                                                      on = c("uf", "faixa_etaria"), 
+prp_uano_m <- (setDT(prp_uano_m %>% mutate(uf = substr(cod_mun,1,2)))[setDT(prp_uano_uf),
+                                                                      on = c("uf", "faixa_etaria"),
                                                                       propuf := propuf])
 
 prp_uano_m$fator <- with(prp_uano_m, (prop/propuf))
@@ -100,14 +100,14 @@ prp_uano_m <- prp_uano_m %>% select(c(ano,uf,cod_mun,Município,faixa_etaria,fat
 piram_uf_fxet <- function(a) {
   pop_uf_fxet_ano <- ibge_projpop_bruf(coluna = "Faixa Etária 1", periodo = a)
   #Equaliza faixas etárias
-  nom_ufs <- as.character(pop_uf_fxet_ano[,1]) 
+  nom_ufs <- as.character(pop_uf_fxet_ano[,1])
   pop_uf_fxet_ano <- pop_uf_fxet_ano[,c(-1,-length(pop_uf_fxet_ano))] %>%
     mutate(ultfaixa = rowSums(.[17:19])) %>%
     select(-17,-18,-19)
-  
+
   #Nomeia corretamente a última faixa
   names(pop_uf_fxet_ano)[length(pop_uf_fxet_ano)] <- "80 anos ou mais"
-  
+
   pr_uf_ano <- cbind(ano = a,nom_ufs,pop_uf_fxet_ano/rowSums(pop_uf_fxet_ano))
   pr_uf_ano <- pr_uf_ano %>% separate(nom_ufs,into = c("uf", "Unidade da Federação"), sep = "\\s", extra = "merge", fill = "left")
 }
@@ -119,19 +119,19 @@ pr_mun_ano <- prp_uano_m
 for (i in 1:length(anosel[anosel>uano])) {
   a <- i+uano
   pr_uf_ano <- rbind(pr_uf_ano,piram_uf_fxet(a))
-  pr_mun_ano <- rbind(pr_mun_ano, prp_uano_m %>% mutate(ano = a)) 
+  pr_mun_ano <- rbind(pr_mun_ano, prp_uano_m %>% mutate(ano = a))
 }
 
 pr_uf_ano <- pr_uf_ano %>% gather(faixa_etaria,prop_u,c(-1,-2,-3))
 
-pr_mun_ano <- setDT(pr_mun_ano)[setDT(pr_uf_ano), on = c("uf", "faixa_etaria","ano"), 
+pr_mun_ano <- setDT(pr_mun_ano)[setDT(pr_uf_ano), on = c("uf", "faixa_etaria","ano"),
                                 prop_m := prop_u*fator ]
 pr_mun_ano <- pr_mun_ano[!(is.na(pr_mun_ano$prop_m)),]
 
 #4) Balanceamento para corrigir erros numéricos que levam a soma de fatores pouco diferente de 1
 pr_mun_ano <- setDT(pr_mun_ano)[,prop_m := prop_m/sum(prop_m, na.rm = TRUE),by = c("cod_mun","ano")]
 
-#pr_mun_ano$prop_m <- with(pr_mun_ano,prop_m/som_mun) 
+#pr_mun_ano$prop_m <- with(pr_mun_ano,prop_m/som_mun)
 
 pr_mun_ano <- pr_mun_ano %>% select(ano,uf,cod_mun,Município,faixa_etaria,prop_m)
 
@@ -153,20 +153,20 @@ nivmun <- 6
 popmun_ano <- API_SIDRA(t, nivel = nivmun, variavel = vpop, inicio = uano+1, fim = anofim)
 
 #Filtra variáveis e compatibiliza código de município com formato DATASUS
-popmun_ano <- popmun_ano %>% 
+popmun_ano <- popmun_ano %>%
   mutate(cod_mun = substr(popmun_ano$`Município (Código)`,1,6)) %>%
   select(ano = `Ano (Código)`, cod_mun, populacao = Valor)
 
 
 #5) Multiplicar percentuais pela população total
 
-pop_mun_fext_ano <- setDT(pr_mun_ano)[setDT(popmun_ano), 
-                                      on = c("cod_mun","ano"), 
+pop_mun_fext_ano <- setDT(pr_mun_ano)[setDT(popmun_ano),
+                                      on = c("cod_mun","ano"),
                                       populacao := i.populacao * prop_m]
 
 
 
-#6) Juntar populações oficialmente estimadas com adições deste script (3 a 5)   
+#6) Juntar populações oficialmente estimadas com adições deste script (3 a 5)
 popmf <- rbind(popmf,pop_mun_fext_ano[,c(1,3:5,7)])
 
 ##6.1) substituir NA's por 0
@@ -179,7 +179,7 @@ popmf[is.na(popmf)] <- 0
 muni_cods <- unique(popmf$cod_mun[!(is.na(popmf$cod_mun))])
 
 if (infanciadet == T) {
-#Nascidos vivos por ano e por município  
+#Nascidos vivos por ano e por município
 nascidos <- rbindlist(lapply((anoin-6):anofim,
                    function(x) data.frame(sinasc_nv_mun(periodo = x),
                                           ano = x, indicador ="nascidos vivos")))
@@ -201,7 +201,7 @@ obitos5a9 <- rbindlist(lapply((anoin-6):anofim,
 #Consolidar os diferentes objetos em uma grande tabela só sus_nasc_ob OK
 sus_nasc_ob <- rbind(nascidos,obitos0a1,obitos1a4,obitos5a9, use.names = F)
 names(sus_nasc_ob)[2] <- "Nasc. ou Mortes"
-sus_nasc_ob <- sus_nasc_ob %>% 
+sus_nasc_ob <- sus_nasc_ob %>%
   separate(Município,into = c("cod_mun","Município"), sep = " ",extra = "merge")
 
 
@@ -228,13 +228,13 @@ tm_ibge[,3] <- as.numeric(tm_ibge[,3])
 #Criação de função customizada para poder rodar em loop
 
 props_calc <- function(a) {
-  
+
 #Ex 2006
 #Denominador
 den_prop1 <- sum(tm_ibge[tm_ibge$ano == a & tm_ibge$Idades.Exatas..X. >= 1 & tm_ibge$Idades.Exatas..X. < 5, 3])
 
 #Indicador para 2
-ind_1a2 <- data.frame(valor = tm_ibge[tm_ibge$ano == a & tm_ibge$Idades.Exatas..X. == 1,3]/den_prop1, 
+ind_1a2 <- data.frame(valor = tm_ibge[tm_ibge$ano == a & tm_ibge$Idades.Exatas..X. == 1,3]/den_prop1,
                 indicador = "prop. obitos de 1 a 2", ano = a, stringsAsFactors = F)
 
 #3) Calcular proporção de mortes de 2 a 3 no contingente entre 1 e 5 para cada ano
@@ -278,15 +278,15 @@ props_tm_ibge <- rbind(props_tm_ibge,gambi)
 
 calc_id <- function(dano = 2012,idade = 4, tabm = props_tm_ibge,tabsus = sus_nasc_ob) {
   #############PROBLEMA - VETORIZAR PARA FAZER POR MUNICIPIO
-  ######1) pegar nascidos ano - 4 - em 2008 (4 a 5 em 2012) - 
-  
+  ######1) pegar nascidos ano - 4 - em 2008 (4 a 5 em 2012) -
+
   nasc <- tabsus[indicador == "nascidos vivos" &  ano == (dano-idade),1:3]
   names(nasc)[3] <- "nascimentos"
   ######2) média de óbitos 0 a 1 ano - 4 e ano-3 - 2008 e 2009
   obs_0 <- tabsus[ano == (dano-idade) & indicador == "mortes 0 a 1 ano",1:3]
   obs0b <- tabsus[ano == (dano+1-idade) & indicador == "mortes 0 a 1 ano",1:3]
 #  print(nasc[cod_mun == "355030",])
-  obs_0 <- full_join(obs_0,obs0b, by = c("cod_mun","Município")) %>% 
+  obs_0 <- full_join(obs_0,obs0b, by = c("cod_mun","Município")) %>%
     mutate_if(is.numeric,coalesce,0) %>%
     transmute(cod_mun = cod_mun, Município = Município,'Nasc. ou Mortes' = rowMeans(select(., matches("Nasc. ou Mortes.*"))))
   #print(obs_0[obs_0$cod_mun == "355030",])
@@ -345,19 +345,19 @@ pop_var_fx <- pop_var_cols %>% transmute(cod_mun = cod_mun,Município = Municíp
                                      rowSums(select(.,matches("população [0-4]"))),
                                    pop_5a6 = rowSums(select(.,matches("população [5-6]"))),
                                    pop_5a9 = rowSums(select(.,matches("população [5-9]"))),
-                                   prop_5a6 = (rowSums(select(.,matches("população [5-6]"))))/ 
+                                   prop_5a6 = (rowSums(select(.,matches("população [5-6]"))))/
                                      rowSums(select(.,matches("população [5-9]")))
                                    ) %>% mutate_if(is.numeric,coalesce,0.05)
 
 
-popm_inf <- popmf[faixa_etaria %in% c("0 a 4 anos","5 a 9 anos") & !(is.na(cod_mun)),] %>% 
-  spread(.,faixa_etaria,populacao) %>% 
-  left_join(.,pop_var_fx, by = c("cod_mun","Município","ano")) 
+popm_inf <- popmf[faixa_etaria %in% c("0 a 4 anos","5 a 9 anos") & !(is.na(cod_mun)),] %>%
+  spread(.,faixa_etaria,populacao) %>%
+  left_join(.,pop_var_fx, by = c("cod_mun","Município","ano"))
 
 #Corrigir NAs de municípios sem registros ref. datasus
-muns_nas <-  popm_inf[is.na(popm_inf$pop_0a4),]$cod_mun 
+muns_nas <-  popm_inf[is.na(popm_inf$pop_0a4),]$cod_mun
 popm_inf[is.na(popm_inf$pop_0a4),4:10] <- popm_inf[popm_inf$cod_mun %in% muns_nas & popm_inf$ano == 2013, 4:10]
-muns_nas5 <- popm_inf[is.na(popm_inf$pop_5a6),]$cod_mun 
+muns_nas5 <- popm_inf[is.na(popm_inf$pop_5a6),]$cod_mun
 popm_inf[is.na(popm_inf$pop_5a6),4:10] <- popm_inf[popm_inf$cod_mun %in% muns_nas5 & popm_inf$ano == 2013, 4:10]
 #
 
@@ -373,7 +373,7 @@ popm_inf <- popm_inf  %>% mutate_if(is.numeric,coalesce,0)
 
 popmf <- popmf[Município != "TOTAL",]
 popmfj <- popmf %>% pivot_wider(names_from = faixa_etaria, values_from = populacao )
-popmf_det <- popm_inf[,-7] %>% full_join(popmfj, 
+popmf_det <- popm_inf[,-7] %>% full_join(popmfj,
                                          by = c("cod_mun","Município","ano"))
 popmf <- popmf_det
 }
