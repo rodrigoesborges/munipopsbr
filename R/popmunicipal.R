@@ -87,8 +87,9 @@ rp_uano <- popmf[popmf$ano == uano  & popmf$cod_mun != "TOTAL",]
 fxet <- unique(rp_uano$faixa_etaria)
 
 #pop_uf pelo RIPSA, último ano disponivel
-rp_uano_uf <- setDT(rp_uano)[,.(populacao = sum(populacao, na.rm = TRUE)),
-                              by = .(uf = substr(cod_mun,1,2), faixa_etaria = faixa_etaria, ano = ano)]
+rp_uano_uf <- setDT(rp_uano)[,uf := substr(cod_mun,1,2)]
+rp_uano_uf <- rp_uano_uf[,populacao := sum(populacao, na.rm = TRUE),
+                             by = .(uf, faixa_etaria, ano)]
 
 #piram_uf pelo RIPSA, último ano disponível
 prp_uano_uf <- setDT(rp_uano_uf)[,propuf := populacao/sum(populacao[faixa_etaria != "Total"], na.rm = TRUE), by = uf]
@@ -133,7 +134,9 @@ pr_uf_ano <- data.frame(matrix(ncol = 20, nrow = 0), stringsAsFactors = FALSE)
 pr_mun_ano <- prp_uano_m
 
 for (i in 1:length(anosel[anosel>uano])) {
-  a <- i+uano
+  if (anoin < uano) {a <- i+uano} else {
+    a <- anoin-1+i
+  }
   pr_uf_ano <- rbind(pr_uf_ano,piram_uf_fxet(a))
   pr_mun_ano <- rbind(pr_mun_ano, prp_uano_m %>% mutate(ano = a))
 }
@@ -392,6 +395,9 @@ popmfj <- popmf %>% pivot_wider(names_from = faixa_etaria, values_from = populac
 popmf_det <- popm_inf[,-7] %>% full_join(popmfj,
                                          by = c("cod_mun","Município","ano"))
 popmf <- popmf_det
+}
+if (anoin > uano) {
+  popmf <- popmf[pomf$ano != 2015,]
 }
 popmf
 }
