@@ -20,6 +20,13 @@
 popmunicipal <- function(anoin = 2012, anofim = 2020, uano = 2015, infanciadet = F) {
 
 
+  ##Carrega pacotes necessários:
+  library(tidyr)
+  library(datasus)
+  library(data.table)
+  library(dplyr)
+  library(stringr)
+  library(RSIDRA)
   # Para Correção de valores nulos extraídos do datasus
   # problema knitr source("R/zr_fun.R")
   # Função para colocar valor de 0.0001 no lugar de erros, não 0 para evitar divisão infinita
