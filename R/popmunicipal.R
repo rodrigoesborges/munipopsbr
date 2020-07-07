@@ -406,7 +406,7 @@ popmf_det <- popm_inf[,-7] %>% full_join(popmfj,
 popmf <- popmf_det
 }
 if (anoin > uano) {
-  popmf <- popmf[pomf$ano != 2015,]
+  popmf <- popmf[popmf$ano != 2015,]
 }
 popmf
 }
